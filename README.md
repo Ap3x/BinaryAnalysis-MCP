@@ -125,6 +125,98 @@ List all imported DLLs for /usr/bin/ls
 Show me the PE headers of C:\Windows\explorer.exe
 ```
 
+### Example output
+
+**`get_binary_info`** — `C:\Windows\System32\notepad.exe`
+
+```json
+{
+  "file": "C:/Windows/System32/notepad.exe",
+  "format": "PE",
+  "entrypoint": "0x1400019b0",
+  "imagebase": "0x140000000",
+  "is_pie": true,
+  "has_nx": true,
+  "sections": 8,
+  "imported_functions": 339,
+  "exported_functions": 0,
+  "libraries": 56,
+  "machine": "AMD64",
+  "subsystem": "WINDOWS_GUI",
+  "has_signatures": false,
+  "has_tls": false,
+  "has_resources": true,
+  "has_rich_header": true,
+  "has_relocations": true
+}
+```
+
+**`get_binary_security`** — `C:\Windows\System32\notepad.exe`
+
+```json
+{
+  "aslr_dynamic_base": true,
+  "aslr_high_entropy_va": true,
+  "dep_nx_compat": true,
+  "seh": true,
+  "guard_cf": true,
+  "force_integrity": false,
+  "appcontainer": false,
+  "is_pie": true,
+  "has_nx": true,
+  "signed": false,
+  "format": "PE"
+}
+```
+
+**`get_binary_sections`** — `C:\Windows\System32\notepad.exe`
+
+```json
+{
+  "format": "PE",
+  "count": 8,
+  "sections": [
+    {
+      "name": ".text",
+      "virtual_address": "0x1000",
+      "size": 159744,
+      "entropy": 6.2826,
+      "virtual_size": 157410,
+      "sizeof_raw_data": 159744,
+      "characteristics": ["CNT_CODE", "MEM_EXECUTE", "MEM_READ"]
+    },
+    {
+      "name": ".rdata",
+      "virtual_address": "0x29000",
+      "size": 45056,
+      "entropy": 5.8039,
+      "virtual_size": 42456,
+      "sizeof_raw_data": 45056,
+      "characteristics": ["CNT_INITIALIZED_DATA", "MEM_READ"]
+    },
+    {
+      "name": ".data",
+      "virtual_address": "0x34000",
+      "size": 4096,
+      "entropy": 1.624,
+      "virtual_size": 10048,
+      "sizeof_raw_data": 4096,
+      "characteristics": ["CNT_INITIALIZED_DATA", "MEM_READ", "MEM_WRITE"]
+    },
+    {
+      "name": ".rsrc",
+      "virtual_address": "0x3a000",
+      "size": 126976,
+      "entropy": 7.0998,
+      "virtual_size": 123344,
+      "sizeof_raw_data": 126976,
+      "characteristics": ["CNT_INITIALIZED_DATA", "MEM_READ"]
+    }
+  ]
+}
+```
+> *Truncated to 4 of 8 sections for brevity.*
+
 ## Project structure
 
 ```
