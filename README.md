@@ -113,6 +113,8 @@ Any MCP-compatible client can launch the server as a subprocess:
 
 Once connected, ask your MCP client to call the tools with an absolute file path:
 
+![Claude Desktop analysing notepad.exe](assets/notepad.png)
+
 ```
 Analyse the security hardening of C:\Windows\System32\notepad.exe
 ```
