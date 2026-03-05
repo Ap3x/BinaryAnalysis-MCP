@@ -27,7 +27,7 @@ Pass an absolute file path to any tool and the format is auto-detected.
 ## Installation
 
 ```bash
-git clone https://github.com/your-username/BinaryAnalysis-MCP.git
+git clone https://github.com/Ap3x/BinaryAnalysis-MCP.git
 cd BinaryAnalysis-MCP
 python -m venv .venv
 # Windows
