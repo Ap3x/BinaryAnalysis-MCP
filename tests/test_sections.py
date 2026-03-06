@@ -25,6 +25,11 @@ class TestSectionsPE:
         assert result["count"] > 0
         assert len(result["sections"]) == result["count"]
 
+    def test_image_base_and_entrypoint(self, pe_mingw):
+        result = get_binary_sections(pe_mingw)
+        assert result["image_base"].startswith("0x")
+        assert result["entrypoint"].startswith("0x")
+
     def test_pe_section_fields(self, pe_mingw):
         result = get_binary_sections(pe_mingw)
         for sec in result["sections"]:
@@ -54,6 +59,11 @@ class TestSectionsELF:
         assert result["format"] == "ELF"
         assert result["count"] > 0
         assert len(result["sections"]) == result["count"]
+
+    def test_image_base_and_entrypoint(self, elf_x64):
+        result = get_binary_sections(elf_x64)
+        assert result["image_base"].startswith("0x")
+        assert result["entrypoint"].startswith("0x")
 
     def test_elf_section_fields(self, elf_x64):
         result = get_binary_sections(elf_x64)
@@ -92,6 +102,11 @@ class TestSectionsMachO:
         assert result["format"] == "Mach-O"
         assert result["count"] > 0
         assert len(result["sections"]) == result["count"]
+
+    def test_image_base_and_entrypoint(self, macho_x64):
+        result = get_binary_sections(macho_x64)
+        assert result["image_base"].startswith("0x")
+        assert result["entrypoint"].startswith("0x")
 
     def test_macho_section_fields(self, macho_x64):
         result = get_binary_sections(macho_x64)

@@ -17,6 +17,20 @@ def get_binary_sections(file_path: str) -> dict:
         binary = parse_binary(file_path)
     except ValueError as exc:
         return _error(str(exc))
+    
+    # Extract image base and entrypoint (format-specific)
+    if isinstance(binary, lief.PE.Binary):
+        image_base = hex_addr(binary.optional_header.imagebase)
+        entrypoint = hex_addr(binary.optional_header.addressof_entrypoint)
+    elif isinstance(binary, lief.ELF.Binary):
+        image_base = hex_addr(binary.imagebase)
+        entrypoint = hex_addr(binary.header.entrypoint)
+    elif isinstance(binary, lief.MachO.Binary):
+        image_base = hex_addr(binary.imagebase)
+        entrypoint = hex_addr(binary.entrypoint)
+    else:
+        image_base = hex_addr(binary.imagebase) if hasattr(binary, "imagebase") else None
+        entrypoint = hex_addr(binary.entrypoint) if hasattr(binary, "entrypoint") else None
 
     sections = []
     for section in binary.sections:
@@ -49,6 +63,8 @@ def get_binary_sections(file_path: str) -> dict:
 
     return {
         "format": format_name().get(binary.format, "Unknown"),
+        "image_base": image_base,
+        "entrypoint": entrypoint,
         "count": len(sections),
         "sections": sections,
     }

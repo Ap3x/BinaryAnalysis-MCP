@@ -36,7 +36,12 @@ MACHO_SAMPLES = {
     "macho_ios": os.path.join(SAMPLES_DIR, "MachO-iOS-armv7s-Helloworld"),
 }
 
-ALL_SAMPLES = {**PE_SAMPLES, **ELF_SAMPLES, **MACHO_SAMPLES}
+COFF_SAMPLES = {
+    "coff_x64": os.path.join(SAMPLES_DIR, "coff-x64-obj.o"),
+    "coff_x86": os.path.join(SAMPLES_DIR, "coff-x86-obj.o"),
+}
+
+ALL_SAMPLES = {**PE_SAMPLES, **ELF_SAMPLES, **MACHO_SAMPLES, **COFF_SAMPLES}
 
 
 def _skip_missing(path: str) -> str:
@@ -93,3 +98,13 @@ def macho_x86():
 @pytest.fixture
 def macho_ios():
     return _skip_missing(MACHO_SAMPLES["macho_ios"])
+
+
+@pytest.fixture
+def coff_x64():
+    return _skip_missing(COFF_SAMPLES["coff_x64"])
+
+
+@pytest.fixture
+def coff_x86():
+    return _skip_missing(COFF_SAMPLES["coff_x86"])
