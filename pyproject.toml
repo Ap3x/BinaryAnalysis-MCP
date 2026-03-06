@@ -1,0 +1,10 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=tools --cov=helpers --cov=app --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["tools", "helpers", "app"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+show_missing = true

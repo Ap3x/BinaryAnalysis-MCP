@@ -22,7 +22,7 @@ def get_binary_headers(file_path: str) -> dict:
         binary = parse_binary(file_path)
     except ValueError as exc:
         return _error(str(exc))
-
+    
     result: dict[str, Any] = {"format": format_name().get(binary.format, "Unknown")}
 
     if isinstance(binary, lief.PE.Binary):

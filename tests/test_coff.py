@@ -95,7 +95,6 @@ class TestCoffSymbols:
         assert main["is_function"] is True
 
     def test_undefined_symbol(self, coff_x86):
-        """_printf in x86 sample is external and undefined."""
         result = get_coff_info(coff_x86)
         printf = next(s for s in result["symbols"] if s["name"] == "_printf")
         assert printf["is_external"] is True
@@ -122,6 +121,28 @@ class TestCoffRelocations:
         result = get_coff_info(coff_x64)
         assert isinstance(result["relocations"], list)
 
+    def test_relocation_fields(self, coff_x64):
+        """Relocations should have address, type, symbol_idx and optionally names."""
+        result = get_coff_info(coff_x64)
+        for rel in result["relocations"]:
+            assert "address" in rel
+            assert "type" in rel
+            assert "symbol_idx" in rel
+
+    def test_relocation_has_symbol_name(self, coff_x64):
+        """At least some relocations should resolve to a symbol name."""
+        result = get_coff_info(coff_x64)
+        if result["relocations"]:
+            has_sym_name = any("symbol_name" in r for r in result["relocations"])
+            assert has_sym_name
+
+    def test_relocation_has_section_name(self, coff_x64):
+        """At least some relocations should resolve to a section name."""
+        result = get_coff_info(coff_x64)
+        if result["relocations"]:
+            has_sec_name = any("section_name" in r for r in result["relocations"])
+            assert has_sec_name
+
 
 # ---------------------------------------------------------------------------
 # Error handling
@@ -133,7 +154,6 @@ class TestCoffErrors:
         assert "error" in result
 
     def test_not_a_coff_file(self, pe_mingw):
-        """A PE file should not parse as COFF."""
         result = get_coff_info(pe_mingw)
         assert "error" in result
 

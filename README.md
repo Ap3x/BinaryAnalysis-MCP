@@ -16,6 +16,7 @@ Pass an absolute file path to any tool and the format is auto-detected.
 | `get_binary_exports` | Exported functions/symbols with ordinals, addresses, and forwarding info |
 | `get_binary_libraries` | Dynamic library dependencies (DLLs / shared objects / dylibs) |
 | `get_binary_security` | Security hardening — ASLR, DEP/NX, SEH, CFG, RELRO, stack canaries, code signing |
+| `get_binary_signatures` | Code-signing details — PE Authenticode/x509 certs, Mach-O LC_CODE_SIGNATURE/CodeDirectory |
 | `get_coff_info` | COFF object file analysis — header, sections, symbols, and relocations |
 
 ## Requirements
@@ -237,6 +238,7 @@ tools/
   exports.py           — get_binary_exports
   libraries.py         — get_binary_libraries
   security.py          — get_binary_security + _pe_security, _elf_security, _macho_security
+  certificates.py      — get_binary_signatures (PE Authenticode/x509, Mach-O LC_CODE_SIGNATURE)
   coff.py              — get_coff_info
 tests/
   conftest.py          — shared fixtures and sample file paths

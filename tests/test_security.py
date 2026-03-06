@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-from tools.security import get_binary_security
+from unittest.mock import MagicMock, patch, PropertyMock
+
+import lief
+
+from tools.security import get_binary_security, _pe_security, _elf_security, _macho_security
 
 
 # ---------------------------------------------------------------------------
@@ -37,6 +41,21 @@ class TestSecurityPE:
         assert result["format"] == "PE"
         assert isinstance(result["is_pie"], bool)
 
+    def test_signed_pe_verification(self):
+        """Exercise the signed PE path (lines 38-39)."""
+        binary = MagicMock(spec=lief.PE.Binary)
+        opt = MagicMock()
+        opt.dll_characteristics_lists = []
+        binary.optional_header = opt
+        binary.is_pie = True
+        binary.has_nx = True
+        binary.has_signatures = True
+        binary.verify_signature.return_value = "OK"
+
+        result = _pe_security(binary)
+        assert result["signed"] is True
+        assert result["signature_verification"] == "OK"
+
 
 # ---------------------------------------------------------------------------
 # ELF security
@@ -69,6 +88,51 @@ class TestSecurityELF:
         result = get_binary_security(elf_so)
         assert result["format"] == "ELF"
 
+    def test_full_relro_via_bind_now(self):
+        """Full RELRO via BIND_NOW tag (line 62)."""
+        seg = MagicMock()
+        seg.type = lief.ELF.Segment.TYPE.GNU_RELRO
+
+        entry_bind = MagicMock()
+        entry_bind.tag = lief.ELF.DynamicEntry.TAG.BIND_NOW
+
+        fn = MagicMock()
+        fn.name = "test"
+
+        binary = MagicMock(spec=lief.ELF.Binary)
+        binary.has_nx = True
+        binary.is_pie = True
+        binary.segments = [seg]
+        binary.dynamic_entries = [entry_bind]
+        binary.imported_functions = [fn]
+        binary.has_interpreter = False
+
+        result = _elf_security(binary)
+        assert result["relro"] == "Full"
+
+    def test_full_relro_via_flags(self):
+        """Full RELRO via FLAGS with DF_BIND_NOW (lines 65-66)."""
+        seg = MagicMock()
+        seg.type = lief.ELF.Segment.TYPE.GNU_RELRO
+
+        entry_flags = MagicMock()
+        entry_flags.tag = lief.ELF.DynamicEntry.TAG.FLAGS
+        entry_flags.value = 0x8  # DF_BIND_NOW
+
+        fn = MagicMock()
+        fn.name = "test"
+
+        binary = MagicMock(spec=lief.ELF.Binary)
+        binary.has_nx = True
+        binary.is_pie = True
+        binary.segments = [seg]
+        binary.dynamic_entries = [entry_flags]
+        binary.imported_functions = [fn]
+        binary.has_interpreter = False
+
+        result = _elf_security(binary)
+        assert result["relro"] == "Full"
+
 
 # ---------------------------------------------------------------------------
 # Mach-O security
@@ -97,6 +161,49 @@ class TestSecurityMachO:
     def test_x86_macho_security(self, macho_x86):
         result = get_binary_security(macho_x86)
         assert result["format"] == "Mach-O"
+
+    def test_build_version_platform(self):
+        """Exercise has_build_version path (lines 110-111)."""
+        hdr = MagicMock()
+        hdr.flags_list = []
+
+        bv = MagicMock()
+        bv.platform = MagicMock()
+
+        fn = MagicMock()
+        fn.name = "test"
+
+        binary = MagicMock(spec=lief.MachO.Binary)
+        binary.is_pie = True
+        binary.has_nx = True
+        binary.has_nx_stack = True
+        binary.has_nx_heap = True
+        binary.has_code_signature = False
+        binary.header = hdr
+        binary.has_build_version = True
+        binary.build_version = bv
+        binary.imported_functions = [fn]
+
+        result = _macho_security(binary)
+        assert "platform" in result
+
+
+# ---------------------------------------------------------------------------
+# Fallback / unknown format
+# ---------------------------------------------------------------------------
+
+class TestSecurityFallback:
+    def test_unknown_format(self):
+        """Exercise the else branch for unknown binary types (line 145)."""
+        binary = MagicMock()
+        binary.has_nx = True
+        binary.is_pie = False
+        binary.format = 999  # unknown
+
+        with patch("tools.security.parse_binary", return_value=binary):
+            result = get_binary_security("fake.bin")
+        assert result["has_nx"] is True
+        assert result["is_pie"] is False
 
 
 # ---------------------------------------------------------------------------
