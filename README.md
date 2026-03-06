@@ -2,7 +2,7 @@
 
 ![Tests](https://github.com/Ap3x/BinaryAnalysis-MCP/actions/workflows/tests.yml/badge.svg)
 
-An MCP server for analysing PE, ELF, and Mach-O binary files using [LIEF](https://lief-project.github.io/).
+An MCP server for analysing PE, ELF, Mach-O, and COFF binary files using [LIEF](https://lief-project.github.io/).
 Pass an absolute file path to any tool and the format is auto-detected.
 
 ## Tools
@@ -11,11 +11,12 @@ Pass an absolute file path to any tool and the format is auto-detected.
 |---|---|
 | `get_binary_info` | Quick triage — format, architecture, entry point, section/import/export counts, NX & PIE flags |
 | `get_binary_headers` | Full header dump (PE DOS/COFF/Optional, ELF header, Mach-O header) |
-| `get_binary_sections` | All sections with name, size, virtual address, entropy, and permissions |
-| `get_binary_imports` | Imported functions grouped by library (PE by DLL, flat list for ELF/Mach-O) |
+| `get_binary_sections` | All sections with name, size, virtual address, entropy, permissions, image base, and entry point |
+| `get_binary_imports` | Imported functions grouped by library (PE by DLL, ELF by shared library, Mach-O by dylib) |
 | `get_binary_exports` | Exported functions/symbols with ordinals, addresses, and forwarding info |
 | `get_binary_libraries` | Dynamic library dependencies (DLLs / shared objects / dylibs) |
 | `get_binary_security` | Security hardening — ASLR, DEP/NX, SEH, CFG, RELRO, stack canaries, code signing |
+| `get_coff_info` | COFF object file analysis — header, sections, symbols, and relocations |
 
 ## Requirements
 
@@ -176,6 +177,8 @@ Show me the PE headers of C:\Windows\explorer.exe
 ```json
 {
   "format": "PE",
+  "image_base": "0x140000000",
+  "entrypoint": "0x19b0",
   "count": 8,
   "sections": [
     {
@@ -234,6 +237,7 @@ tools/
   exports.py           — get_binary_exports
   libraries.py         — get_binary_libraries
   security.py          — get_binary_security + _pe_security, _elf_security, _macho_security
+  coff.py              — get_coff_info
 tests/
   conftest.py          — shared fixtures and sample file paths
   test_helpers.py      — tests for helpers.py utilities
@@ -244,6 +248,7 @@ tests/
   test_exports.py      — tests for get_binary_exports
   test_libraries.py    — tests for get_binary_libraries
   test_security.py     — tests for get_binary_security
+  test_coff.py         — tests for get_coff_info
 binary-samples/        — test binaries (git submodule)
 .github/workflows/
   tests.yml            — CI: runs pytest on push/PR to main
